@@ -15,6 +15,7 @@ export function drawCandlestick(scene, x, y, z) {
     const baseGeometry = new THREE.CylinderGeometry(0.5 * scaleFactor, 0.5 * scaleFactor, 5 * scaleFactor, 16);
     const baseMaterial = new THREE.MeshStandardMaterial({ map: candlestickTexture }); 
     const base = new THREE.Mesh(baseGeometry, baseMaterial);
+    base.castShadow = true;
     base.position.set(x, y + (5.5 * scaleFactor), z); // Adjusted for smaller height
     scene.add(base);
 
@@ -22,12 +23,14 @@ export function drawCandlestick(scene, x, y, z) {
     const flameGeometry = new THREE.SphereGeometry(0.6 * scaleFactor, 3, 3);
     const flameMaterial = new THREE.MeshBasicMaterial({ map: candleFlameTexture });
     const flame = new THREE.Mesh(flameGeometry, flameMaterial);
+    flame.castShadow = true;
     flame.position.set(x, y, z);
     scene.add(flame);
 
     // Add a point light for flame glow
     const flameLight = new THREE.PointLight(0xFFA500, 0.5, 1, 2); // Reduce intensity & range for small size
     flameLight.position.set(x, y + (5 * scaleFactor), z);
+    flameLight.castShadow = true;
     scene.add(flameLight);
 
     function animateFlame() {

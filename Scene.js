@@ -2,7 +2,6 @@ import * as THREE from 'three';
 import { MTLLoader } from 'three/examples/jsm/loaders/MTLLoader.js';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { drawCandlestick } from './Candlestick.js';
 import { makeCandleRing } from './Candlestick.js';
 import { drawFirefly } from './Firefly.js';
 
@@ -14,9 +13,10 @@ objLoaderTree.setPath('assets/');
 const mtlLoader = new MTLLoader();
 mtlLoader.setPath('assets/');
 function main() {
-
 	const canvas = document.querySelector( '#c' );
 	const renderer = new THREE.WebGLRenderer( { antialias: true, canvas } );
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap; // default THREE.PCFShadowMap
   renderer.setSize(window.innerWidth, window.innerHeight);
 
 	const fov = 50;
@@ -31,7 +31,7 @@ function main() {
   // Optionally, enable damping (requires calling controls.update() in the render loop)
   controls.enableDamping = true;
   controls.minPolarAngle = 0;             // Look directly upward is allowed.
-  controls.maxPolarAngle = (Math.PI / 2)-.01;     // Prevent the camera from going below the horizontal.
+  controls.maxPolarAngle = (Math.PI / 2)+.5;     // Prevent the camera from going below the horizontal.
 
 
 	const scene = new THREE.Scene();
@@ -81,6 +81,7 @@ function main() {
     });
   
     const mesh = new THREE.Mesh(planeGeo, planeMat);
+    mesh.receiveShadow = true;
     mesh.rotation.x = -Math.PI / 2; // rotate to lie flat
     mesh.position.y = 0;
     scene.add(mesh);
@@ -93,7 +94,13 @@ function main() {
   const intensity = 1;
   const light = new THREE.DirectionalLight(color, intensity);
   light.position.set(-1, 4, 4);
+  light.castShadow = true;
   scene.add(light);
+
+  light.shadow.mapSize.width = 512; // default
+  light.shadow.mapSize.height = 512; // default
+  light.shadow.camera.near = 0.1; // default
+  light.shadow.camera.far = 10; // default
 
   // add ambient light and hemisphere light
   const ambientLight = new THREE.AmbientLight(0x404040, 2);
@@ -107,7 +114,22 @@ function main() {
   //drawCandlestick(scene, 0,0,1);
   makeCandleRing(scene, 0,.2,0, 10);
 
-  drawFirefly(scene, 0, .3, 1.3);
+  //drawFirefly(scene, 0, .7, 1.3);
+  // Randomly place 8 fireflies around in the trees
+  for (let i = 0; i < 8; i++) {
+    // Generate a random angle to spread them around the circle
+    const angle = Math.random() * Math.PI * 2;
+    // Choose a distance from the center; adjust these numbers to suit your tree circle
+    const distance = 0.5 + Math.random() * 0.5;
+    // Calculate x and z positions based on the random angle and distance
+    const x = Math.cos(angle) * distance;
+    const z = Math.sin(angle) * distance;
+    // Random height between 0.5 and 2 (you can adjust the range as needed)
+    const y = 0.5 + Math.random() * 1.5;
+    
+    drawFirefly(scene, x, y, z);
+  }
+
 
   // put figure in center of the ring
   mtlLoader.load('figure.mtl', (materials) => {
@@ -115,6 +137,10 @@ function main() {
     objLoaderFigure.setMaterials(materials);
     
     objLoaderFigure.load('figure.obj', (object) => {
+      object.traverse(child => {
+        if(child.isMesh) child.castShadow = true;
+      });
+      
       object.position.set(0, 0, 0);
       scene.add(object);
 
@@ -146,6 +172,10 @@ function drawTreeCircle(scene, x, y, z, numTrees, radius = 1) {
       objLoaderTree.load(
           'Tree1.obj',
           (object) => {
+              object.traverse(child => {
+                if(child.isMesh) child.castShadow = true;
+              });
+            
               object.scale.set(0.1, 0.1, 0.1);
 
               for (let i = 0; i < numTrees; i++) {
@@ -157,6 +187,7 @@ function drawTreeCircle(scene, x, y, z, numTrees, radius = 1) {
                   const treeClone = object.clone();
                   treeClone.position.set(treeX, y, treeZ);
 
+                  //treeClone.castShadow = true;
                   scene.add(treeClone);
               }
           },
