@@ -48,7 +48,7 @@ export function drawCandlestick(scene, x, y, z) {
     animateFlame();
 }
 
-// animation not working
+
 export function makeCandleRing(scene, centerX, centerY, centerZ, numCandles) {
     const radius = 0.5;         // Circle radius for the candles
     const angularSpeed = 0.2;   // Radians per second at which each candle moves
@@ -98,8 +98,7 @@ export function makeCandleRing(scene, centerX, centerY, centerZ, numCandles) {
           centerY,
           centerZ + Math.sin(candle.userData.angle) * radius
         );
-        // Re-orient the candle so it continuously faces the center.
-        candle.lookAt(centerX, centerY, centerZ);
+        
       });
       
       requestAnimationFrame(animateRing);

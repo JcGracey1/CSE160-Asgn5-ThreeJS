@@ -132,6 +132,7 @@ function main() {
 
 
   // put figure in center of the ring
+  // figure credit: https://sketchfab.com/3d-models/cloaked-figure-f4e2c262ed4e456484f232d6afa99629
   mtlLoader.load('figure.mtl', (materials) => {
     materials.preload();
     objLoaderFigure.setMaterials(materials);
@@ -164,6 +165,7 @@ function main() {
 
 }
 
+// Tree obj credit: https://free3d.com/3d-model/realistic-tree-pack-3-trees-95419.html
 function drawTreeCircle(scene, x, y, z, numTrees, radius = 1) {
   mtlLoader.load('Tree1.mtl', (materials) => {
       materials.preload();
